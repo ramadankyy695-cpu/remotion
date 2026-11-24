@@ -195,56 +195,56 @@ export const PriaMeninggalkanWanita: React.FC = () => {
 			<Html5Audio
 				src={staticFile('pria/piano.wav')}
 				volume={(f) =>
-					interpolate(f, [0, s(58.9), s(59.4)], [0.13, 0.13, 0.3], {
+					interpolate(f, [0, s(58.9), s(59.4)], [0.11, 0.11, 0.28], {
 						extrapolateLeft: 'clamp',
 						extrapolateRight: 'clamp',
 					})
 				}
 			/>
 			{/* room ambience */}
-			<Loop src="room.wav" from={S1.from} to={S1.to + 8} volume={0.14} />
-			<Loop src="rain.wav" from={S1.from} to={S1.to + 8} volume={0.06} />
-			<Loop src="room.wav" from={S4.from - 8} to={S4.to + 8} volume={0.14} />
-			<Loop src="rain.wav" from={S4.from - 8} to={S4.to + 8} volume={0.05} />
-			<Loop src="room.wav" from={S7.from - 8} to={S7.to + 8} volume={0.13} />
-			<Loop src="rain.wav" from={S7.from - 8} to={S7.to + 8} volume={0.06} />
+			<Loop src="room.wav" from={S1.from} to={S1.to + 8} volume={0.07} />
+			<Loop src="rain.wav" from={S1.from} to={S1.to + 8} volume={0.035} />
+			<Loop src="room.wav" from={S4.from - 8} to={S4.to + 8} volume={0.07} />
+			<Loop src="rain.wav" from={S4.from - 8} to={S4.to + 8} volume={0.03} />
+			<Loop src="room.wav" from={S7.from - 8} to={S7.to + 8} volume={0.07} />
+			<Loop src="rain.wav" from={S7.from - 8} to={S7.to + 8} volume={0.035} />
 			{/* street / rain */}
 			<Loop
 				src="rain.wav"
-				from={S2.from - 8}
-				to={S3.to + 8}
-				volume={0.3}
-				fade={20}
-			/>
-			<Loop
-				src="city.wav"
 				from={S2.from - 8}
 				to={S3.to + 8}
 				volume={0.16}
 				fade={20}
 			/>
 			<Loop
+				src="city.wav"
+				from={S2.from - 8}
+				to={S3.to + 8}
+				volume={0.08}
+				fade={20}
+			/>
+			<Loop
 				src="rain.wav"
 				from={S5.from - 8}
 				to={S6.to + 8}
-				volume={0.32}
+				volume={0.17}
 				fade={20}
 			/>
 			<Loop
 				src="city.wav"
 				from={S5.from - 8}
 				to={S6.to + 8}
-				volume={0.14}
+				volume={0.07}
 				fade={20}
 			/>
-			<Steps sceneFrom={sceneStart(S2.from)} frames={s2Steps} volume={0.35} />
-			<Steps sceneFrom={sceneStart(S6.from)} frames={s6Steps} volume={0.3} />
+			<Steps sceneFrom={sceneStart(S2.from)} frames={s2Steps} volume={0.2} />
+			<Steps sceneFrom={sceneStart(S6.from)} frames={s6Steps} volume={0.18} />
 			{/* morning */}
 			<Loop
 				src="birds.wav"
 				from={S8.from - 8}
 				to={DURATION}
-				volume={0.2}
+				volume={0.12}
 				fade={25}
 			/>
 			{/* soft whooshes on the big transitions */}
@@ -256,7 +256,7 @@ export const PriaMeninggalkanWanita: React.FC = () => {
 					name="whoosh"
 					layout="none"
 				>
-					<Html5Audio src={staticFile('pria/whoosh.wav')} volume={0.07} />
+					<Html5Audio src={staticFile('pria/whoosh.wav')} volume={0.04} />
 				</Sequence>
 			))}
 		</AbsoluteFill>
