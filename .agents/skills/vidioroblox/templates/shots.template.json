@@ -1,0 +1,13 @@
+[
+  {
+    "id": "shot-01",
+    "durationSec": 3,
+    "location": "3D location name",
+    "action": "clear visible character action",
+    "camera": "shot size + angle + movement",
+    "characterState": "idle | walk | run | talk | react",
+    "props": [],
+    "vo": {"startSec": 0, "endSec": 3},
+    "notes": "only shot-specific notes"
+  }
+]
