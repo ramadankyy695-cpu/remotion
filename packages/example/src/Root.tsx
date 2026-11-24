@@ -146,6 +146,7 @@ import {
 } from './Postmount/PostmountExample';
 import {PremountedExample} from './Premount';
 import {PremountedRemoteVideos} from './Premount/RemoteVideos';
+import {PriaMeninggalkanWanitaComposition} from './PriaMeninggalkanWanita/Root';
 import ReactSvg from './ReactSvg';
 import InfinityVideo from './ReallyLongVideo';
 import RemoteVideo from './RemoteVideo';
@@ -183,8 +184,8 @@ import {
 import {TriggerCalculateMetadata} from './StudioApis/TriggerCalculateMetadata';
 import {WriteStaticFile} from './StudioApis/WriteStaticFile';
 import {SubtitleArtifact} from './SubtitleArtifact/SubtitleArtifact';
-import {SvgFilter} from './SvgFilter';
 import './style.css';
+import {SvgFilter} from './SvgFilter';
 import {Tailwind} from './Tailwind';
 import {TenFrameTester} from './TenFrameTester';
 import {TextStroke} from './TextStroke';
@@ -1994,6 +1995,7 @@ export const Index: React.FC = () => {
 				/>
 			</Folder>
 			<Folder name="three">
+				<PriaMeninggalkanWanitaComposition />
 				<Still id="Orb" component={OrbScene} width={2000} height={2000} />
 				<Composition
 					id="three-basic"
