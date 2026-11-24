@@ -1,0 +1,226 @@
+[
+  {
+    "id": "sh01",
+    "frames": [
+      0,
+      90
+    ],
+    "durationSec": 3.0,
+    "location": "mine tunnel",
+    "action": "walk together (tracking)",
+    "beat": 1,
+    "vo": {
+      "startSec": 0.0,
+      "endSec": 3.0
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh02",
+    "frames": [
+      90,
+      198
+    ],
+    "durationSec": 3.6,
+    "location": "mine tunnel",
+    "action": "promise + fist bump (push-in)",
+    "beat": 2,
+    "vo": {
+      "startSec": 3.0,
+      "endSec": 6.6
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh03",
+    "frames": [
+      198,
+      276
+    ],
+    "durationSec": 2.6,
+    "location": "crystal chamber",
+    "action": "\"Suatu hari\" chamber reveal (crane/tilt down)",
+    "beat": 3,
+    "vo": {
+      "startSec": 6.6,
+      "endSec": 9.2
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh04",
+    "frames": [
+      276,
+      360
+    ],
+    "durationSec": 2.8,
+    "location": "crystal chamber",
+    "action": "chest opens (low close-up, crane up)",
+    "beat": 4,
+    "vo": {
+      "startSec": 9.2,
+      "endSec": 12.0
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh05",
+    "frames": [
+      360,
+      438
+    ],
+    "durationSec": 2.6,
+    "location": "crystal chamber",
+    "action": "\"lengah\" gem, friend grabs chest (push + truck)",
+    "beat": 5,
+    "vo": {
+      "startSec": 12.0,
+      "endSec": 14.6
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh06",
+    "frames": [
+      438,
+      480
+    ],
+    "durationSec": 1.4,
+    "location": "crystal chamber",
+    "action": "shocked close-up (snap push-in)",
+    "beat": 6,
+    "vo": {
+      "startSec": 14.6,
+      "endSec": 16.0
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh07",
+    "frames": [
+      480,
+      534
+    ],
+    "durationSec": 1.8,
+    "location": "mine tunnel",
+    "action": "friend runs with treasure (truck-left)",
+    "beat": 7,
+    "vo": {
+      "startSec": 16.0,
+      "endSec": 17.8
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh08",
+    "frames": [
+      534,
+      597
+    ],
+    "durationSec": 2.1,
+    "location": "mine tunnel",
+    "action": "main chases (pull-back tracking)",
+    "beat": 8,
+    "vo": {
+      "startSec": 17.8,
+      "endSec": 19.9
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh09",
+    "frames": [
+      597,
+      669
+    ],
+    "durationSec": 2.4,
+    "location": "stone door",
+    "action": "stone door slams (shake)",
+    "beat": 9,
+    "vo": {
+      "startSec": 19.9,
+      "endSec": 22.3
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh10",
+    "frames": [
+      669,
+      831
+    ],
+    "durationSec": 5.4,
+    "location": "stone door",
+    "action": "the vow (low orbit + push-in)",
+    "beat": 10,
+    "vo": {
+      "startSec": 22.3,
+      "endSec": 27.7
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh11",
+    "frames": [
+      831,
+      963
+    ],
+    "durationSec": 4.4,
+    "location": "bedroom",
+    "action": "bedroom, 3 days later, phone buzzes (pan + push)",
+    "beat": 11,
+    "vo": {
+      "startSec": 27.7,
+      "endSec": 32.1
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh12",
+    "frames": [
+      963,
+      1050
+    ],
+    "durationSec": 2.9,
+    "location": "bedroom (phone POV)",
+    "action": "phone POV, notification (push-in)",
+    "beat": 12,
+    "vo": {
+      "startSec": 32.1,
+      "endSec": 35.0
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh13",
+    "frames": [
+      1050,
+      1140
+    ],
+    "durationSec": 3.0,
+    "location": "bedroom (phone POV)",
+    "action": "the message (push-in)",
+    "beat": 13,
+    "vo": {
+      "startSec": 35.0,
+      "endSec": 38.0
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  },
+  {
+    "id": "sh14",
+    "frames": [
+      1140,
+      1202
+    ],
+    "durationSec": 2.07,
+    "location": "bedroom",
+    "action": "devastated face (slow push-in)",
+    "beat": 14,
+    "vo": {
+      "startSec": 38.0,
+      "endSec": 40.07
+    },
+    "timing": "phrase-level estimate (pause detection)"
+  }
+]

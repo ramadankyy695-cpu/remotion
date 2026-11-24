@@ -1,0 +1,19 @@
+{
+  "rig": "src/components/Character2D.tsx",
+  "textures": "src/lib/textures.ts (procedural canvas, cached per key)",
+  "characters": {
+    "main": {"palette": "PALETTE.main", "outfit": "blue t-shirt, navy pants"},
+    "friend": {"palette": "PALETTE.friend", "outfit": "red hoodie, charcoal pants"}
+  },
+  "views": ["front", "side"],
+  "states": {
+    "idle": "basePose + breathe()",
+    "walk": "cycle(f, 0.9-1.0, 0.38-0.45)",
+    "run": "cycle(f, 1.7, 0.8) / front-view lift + arm pump",
+    "talk": "talkMouth(f)",
+    "carry": "side arms 1.1/0.9 + Chest prop",
+    "pound": "side arm swings toward door",
+    "sit": "pose.sit = true"
+  },
+  "expressions": ["neutral", "happy", "joy", "amazed", "shocked", "guilty", "angry", "sad", "devastated", "determined"]
+}

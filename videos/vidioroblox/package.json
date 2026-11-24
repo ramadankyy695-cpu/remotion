@@ -1,0 +1,25 @@
+{
+  "name": "vidioroblox",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "audio": "python3 scripts/make_audio.py",
+    "stills": "node scripts/stills.mjs",
+    "render": "python3 scripts/make_audio.py && remotion render src/index.ts SahabatHarta out/sahabat-harta.mp4 --codec=h264 --crf=18 --audio-codec=aac --audio-bitrate=192k"
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.8.2",
+    "@remotion/cli": "^4.0.547",
+    "@remotion/three": "^4.0.547",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "^4.0.547",
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/three": "^0.187.0",
+    "typescript": "^5.9.3"
+  }
+}

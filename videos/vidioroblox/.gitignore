@@ -1,0 +1,5 @@
+node_modules
+out
+public/audio/music.wav
+public/audio/ambience.wav
+public/audio/sfx.wav
