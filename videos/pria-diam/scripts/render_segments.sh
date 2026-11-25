@@ -12,7 +12,7 @@ for r in "${RANGES[@]}"; do
   mv "$f.tmp.mp4" "$f"
 done
 echo "audio $(date +%T)"
-npx remotion render PriaDiam out/seg/audio.wav --codec=wav --log=error
+npx remotion render PriaDiam out/seg/audio.wav --codec=wav --audio-codec=pcm-16 --log=error
 : > out/seg/list.txt
 for r in "${RANGES[@]}"; do echo "file 'seg-$r.mp4'" >> out/seg/list.txt; done
 ffmpeg -loglevel error -y -f concat -safe 0 -i out/seg/list.txt -i out/seg/audio.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 320k -ar 48000 -movflags +faststart -shortest out/pria-diam.mp4
