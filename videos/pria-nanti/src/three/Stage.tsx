@@ -2,7 +2,7 @@ import React, {useLayoutEffect} from 'react';
 import * as THREE from 'three';
 import {useThree} from '@react-three/fiber';
 import {ThreeCanvas} from '@remotion/three';
-import {EffectComposer, Bloom, DepthOfField, Vignette, Noise} from '@react-three/postprocessing';
+import {EffectComposer, Bloom, DepthOfField, Vignette, Noise, SMAA} from '@react-three/postprocessing';
 import {useVideoConfig} from 'remotion';
 
 export type Cam = {
@@ -58,7 +58,7 @@ export const Stage: React.FC<{
 			height={height}
 			shadows
 			dpr={1}
-			gl={{antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance'}}
+			gl={{antialias: false, preserveDrawingBuffer: true, powerPreference: 'high-performance'}}
 			camera={{fov: cam.fov, position: cam.pos, near: 0.03, far: 200}}
 			style={{background: bg}}
 		>
@@ -67,7 +67,8 @@ export const Stage: React.FC<{
 			<CameraRig cam={cam} />
 			<Exposure exposure={exposure} />
 			{children}
-			<EffectComposer multisampling={4} enableNormalPass={false}>
+			<EffectComposer multisampling={0} enableNormalPass={false}>
+				<SMAA />
 				<DepthOfField worldFocusDistance={focus ?? 3} worldFocusRange={focusRange} bokehScale={bokeh} resolutionScale={0.5} />
 				<Bloom intensity={bloom} luminanceThreshold={0.82} luminanceSmoothing={0.2} mipmapBlur />
 				<Vignette darkness={0.55} offset={0.28} />
