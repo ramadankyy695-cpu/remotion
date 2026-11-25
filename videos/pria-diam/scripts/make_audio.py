@@ -260,7 +260,7 @@ sfx *= rain_gain[:, None]
 
 # distant thunder rumble
 th = lp(noise(int(5.5 * SR), 'brown'), 160) * env_ar(int(5.5 * SR), 1.2, 1.6)[:, None]
-place(sfx, th, 0.6, 0.55)
+place(sfx, th, 0.6, 0.3)
 place(sfx, th[::-1] * 0.6, 38.4, 0.35)
 
 # phone notification
@@ -296,10 +296,10 @@ def tap(f=3200, length=0.025, g=1.0):
 
 
 for i in range(MSG_LEN):
-    place(sfx, tap(3000), 6.9 + 2.4 * i / MSG_LEN + rng.uniform(-0.01, 0.01), 0.18, pan=0.05)
+    place(sfx, tap(3000), 6.9 + 2.4 * i / MSG_LEN + rng.uniform(-0.01, 0.01), 0.08, pan=0.05)
 for i in range(MSG_LEN):
-    place(sfx, tap(2300, 0.02), 12.2 + 1.4 * i / MSG_LEN, 0.15, pan=0.05)
-place(sfx, tap(1800, 0.04), 13.95, 0.35)  # lock click
+    place(sfx, tap(2300, 0.02), 12.2 + 1.4 * i / MSG_LEN, 0.07, pan=0.05)
+place(sfx, tap(1800, 0.04), 13.95, 0.15)  # lock click
 
 # flashback: whoosh swell in, clock ticking, muffled room tone
 def whoosh(dur=1.0, lo=200, hi=4000, rev=False):
@@ -316,10 +316,10 @@ def whoosh(dur=1.0, lo=200, hi=4000, rev=False):
     return y[::-1] if rev else y
 
 
-place(sfx, whoosh(1.1, 300, 6000), 13.6, 0.4)
+place(sfx, whoosh(1.1, 300, 6000), 13.6, 0.22)
 place(sfx, reverb(whoosh(0.9, 200, 3000, True), 2.0, 0.5), 19.2, 0.3)
-place(sfx, whoosh(0.5, 400, 7000), 29.7, 0.35)
-place(sfx, lp(whoosh(1.2, 80, 900), 1200), 37.6, 0.45)
+place(sfx, whoosh(0.5, 400, 7000), 29.7, 0.18)
+place(sfx, lp(whoosh(1.2, 80, 900), 1200), 37.6, 0.25)
 place(sfx, whoosh(0.9, 200, 2500), 46.4, 0.18)
 
 for k in range(6):
@@ -370,7 +370,7 @@ for i in range(int((30.1 - 19.6) * 200)):
     ph = (abs_t - 19.6) * freq
     s = np.sin(ph)
     if prev is not None and np.sign(s) != np.sign(prev) and s != 0:
-        g = 0.18 + 0.12 * grow
+        g = 0.1 + 0.06 * grow
         st = step_sound(g, 1800 + 1500 * grow)
         if abs_t < 22.0:
             st = reverb(np.stack([st, st], 1), 1.8, 0.55, seed=int(abs_t * 10))[:, 0]
@@ -449,7 +449,7 @@ hum *= fade_curve(t_axis(no), [(0, 0), (0.05, 1), (no / SR - 0.05, 1), (no / SR,
 place(sfx, hum, o0, 1.0)
 kt = o0 + 0.03
 while kt < o1 - 0.05:
-    place(sfx, tap(2600, 0.03, 1.0) + tap(900, 0.03, 0.6), kt, 0.16, pan=rng.uniform(-0.15, 0.15))
+    place(sfx, tap(2600, 0.03, 1.0) + tap(900, 0.03, 0.6), kt, 0.08, pan=rng.uniform(-0.15, 0.15))
     kt += rng.uniform(0.06, 0.16)
 
 # heartbeat during "padahal ... sendirian"
@@ -506,7 +506,10 @@ def rms(x):
 m_rms = rms(music[int(1 * SR): int(50 * SR)])
 music *= (vo_rms * 10 ** (-13.5 / 20)) / (m_rms + 1e-9)
 s_rms = rms(sfx[int(1 * SR): int(50 * SR)])
-sfx *= (vo_rms * 10 ** (-15.0 / 20)) / (s_rms + 1e-9)
+sfx *= (vo_rms * 10 ** (-22.0 / 20)) / (s_rms + 1e-9)
+# soft-limit transients (taps, steps, whooshes) so no effect pokes out above the VO
+lim = vo_rms * 10 ** (-4.0 / 20) * 2.0
+sfx = lim * np.tanh(sfx / lim)
 
 for name, x in [('music', music), ('sfx', sfx)]:
     peak = np.max(np.abs(x))

@@ -181,6 +181,8 @@ type Props = {
 	readonly rightHand?: React.ReactNode;
 	readonly leftHand?: React.ReactNode;
 	readonly tears?: number;
+	// Hide hand meshes (used when a prop renders its own gripping hands).
+	readonly hideHands?: boolean;
 };
 
 const useMat = (
@@ -251,6 +253,7 @@ export const Character: React.FC<Props> = ({
 	rightHand,
 	leftHand,
 	tears = 0,
+	hideHands = false,
 }) => {
 	const skin = useMat(look.skin, 0.58, opacity);
 	const top = useMat(look.top, 0.93, opacity);
@@ -309,9 +312,13 @@ export const Character: React.FC<Props> = ({
 					<mesh geometry={GEO.foreArm} material={top} position={[0, -0.13, 0]} castShadow={cs} />
 					<mesh geometry={GEO.cuff} material={topDark} position={[0, -0.245, 0]} rotation={[Math.PI / 2, 0, 0]} />
 					<group position={[0, -0.27, 0]} rotation={[wr, 0, 0]}>
+						{hideHands ? null : (
+							<>
 						<mesh geometry={GEO.palm} material={skin} position={[0, -0.05, 0.005]} scale={[0.036, 0.055, 0.02]} castShadow={cs} />
 						<mesh geometry={GEO.finger} material={skin} position={[0, -0.1, 0.012]} rotation={[-0.35, 0, 0]} scale={[2.1, 1.1, 1.0]} castShadow={cs} />
 						<mesh geometry={GEO.finger} material={skin} position={[-0.028 * side, -0.045, 0.02]} rotation={[-0.4, 0, 0.5 * side]} scale={[0.85, 0.7, 0.85]} castShadow={cs} />
+							</>
+						)}
 						{held}
 					</group>
 				</group>

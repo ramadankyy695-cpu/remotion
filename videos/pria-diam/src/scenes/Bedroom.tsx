@@ -2,9 +2,10 @@ import React, {useMemo} from 'react';
 import {useCurrentFrame} from 'remotion';
 import * as THREE from 'three';
 import {dist, path1, path3, shake, add3, tw} from '../anim';
-import {Character} from '../three/Character';
+import {Character, RAKA} from '../three/Character';
 import {Bed, Chair, City, Dust, Glow, LightCone, Nightstand, Phone, Rain, Room, SpotAt, WindowUnit} from '../three/env';
 import {lerp3} from '../anim';
+import {reach} from '../three/ik';
 import type {Face, Pose} from '../three/pose';
 import {blinkAt, breathe, mixFace, mixPose, NEUTRAL_FACE, SIT_SLUMP} from '../three/pose';
 import type {V3} from '../three/Stage';
@@ -45,11 +46,73 @@ export const PHONE_HOLD: Pose = {
 
 const SAD: Face = {...NEUTRAL_FACE, smile: -0.45, brow: 0.8, lookY: -0.6};
 
-export const PhoneInHand: React.FC<{typed: string; cursor: boolean; on: number}> = ({typed, cursor, on}) => (
-	<group position={[0.065, -0.075, 0.03]} rotation={[-1.25, 0.0, 0.05]}>
-		<Phone typed={typed} cursor={cursor} screenOn={on} />
+
+// ---------- Phone held in both hands, thumbs typing on the screen ----------
+// Phone-local space: x right, y up, z out of the screen.
+const WRIST_LOCAL: Record<1 | -1, THREE.Vector3> = {
+	1: new THREE.Vector3(0.05, -0.1, -0.03),
+	[-1]: new THREE.Vector3(-0.05, -0.1, -0.03),
+};
+
+// Solves both arms so the wrists meet the phone grip. Phone-local +x maps to the
+// character's right arm because the phone is turned to face him.
+export const holdPhone = (pose: Pose, pos: V3, rot: [number, number, number]): Pose => {
+	const e = new THREE.Euler(rot[0], rot[1], rot[2]);
+	const p = new THREE.Vector3(...pos);
+	const right = WRIST_LOCAL[1].clone().applyEuler(e).add(p);
+	const left = WRIST_LOCAL[-1].clone().applyEuler(e).add(p);
+	return reach(reach(pose, -1, right), 1, left);
+};
+
+const skinMat = new THREE.MeshStandardMaterial({color: RAKA.skin, roughness: 0.58});
+const palmGeo = new THREE.SphereGeometry(1, 16, 12);
+const fingerGeo = new THREE.CapsuleGeometry(0.0085, 0.05, 4, 10);
+const thumbGeo = new THREE.CapsuleGeometry(0.0098, 0.03, 4, 10);
+
+// mode: 'rest' (no typing), 'type' (both thumbs alternate), 'delete' (right thumb on backspace)
+const GripHand: React.FC<{s: 1 | -1; lift: number; aim: number}> = ({s, lift, aim}) => (
+	<group>
+		{/* palm behind the phone, wrist below */}
+		<mesh geometry={palmGeo} material={skinMat} position={[s * 0.03, -0.045, -0.02]} scale={[0.034, 0.055, 0.017]} castShadow />
+		<mesh geometry={palmGeo} material={skinMat} position={[s * 0.045, -0.085, -0.025]} scale={[0.028, 0.03, 0.022]} castShadow />
+		{/* fingers wrapping around the side edge */}
+		{[0.0, -0.022, -0.044].map((y, i) => (
+			<mesh key={i} geometry={fingerGeo} material={skinMat} position={[s * 0.041, y + 0.012, -0.004]} rotation={[0, 0, s * 0.12]} scale={[1, 0.42, 1]} castShadow />
+		))}
+		{/* thumb from the lower side edge across the screen */}
+		<group position={[s * 0.04, -0.06, 0.003]} rotation={[lift, 0, s * aim]}>
+			<mesh geometry={palmGeo} material={skinMat} position={[0, 0.0, 0]} scale={[0.013, 0.016, 0.011]} castShadow />
+			<mesh geometry={thumbGeo} material={skinMat} position={[0, 0.026, 0.004]} castShadow />
+		</group>
 	</group>
 );
+
+export const PhoneGrip: React.FC<{t: number; mode: 'rest' | 'type' | 'delete'; typed: string; cursor: boolean; on: number}> = ({t, mode, typed, cursor, on}) => {
+	// tap cycle: thumb dips to the glass (lift ~0) and rises (lift ~0.45)
+	const cyc = (ph: number, rate: number) => 0.5 + 0.5 * Math.sin(t * rate + ph);
+	const tapCount = Math.floor((t * 13) / (Math.PI * 2));
+	let rLift = 0.32;
+	let lLift = 0.32;
+	let rAim = 0.75;
+	let lAim = 0.8;
+	if (mode === 'type') {
+		rLift = 0.05 + 0.4 * cyc(0, 13);
+		lLift = 0.05 + 0.4 * cyc(Math.PI, 13);
+		rAim = 0.62 + ((tapCount * 37) % 7) * 0.05;
+		lAim = 0.62 + ((tapCount * 53) % 7) * 0.05;
+	} else if (mode === 'delete') {
+		rLift = 0.04 + 0.32 * cyc(0, 22);
+		rAim = 0.42;
+		lLift = 0.4;
+	}
+	return (
+		<group>
+			<Phone typed={typed} cursor={cursor} screenOn={on} />
+			<GripHand s={1} lift={rLift} aim={rAim} />
+			<GripHand s={-1} lift={lLift} aim={lAim} />
+		</group>
+	);
+};
 
 export const BedroomSet: React.FC<{t: number; lamp: number}> = ({t, lamp}) => {
 	const flick = 0.94 + 0.06 * Math.sin(t * 13.1) * Math.sin(t * 4.7);
@@ -128,15 +191,24 @@ export const BedroomSet: React.FC<{t: number; lamp: number}> = ({t, lamp}) => {
 	);
 };
 
+const LAP_POS: V3 = [0.0, 0.6, -0.22];
+const HOLD_POS: V3 = [0.0, 0.99, -0.2];
+const PHONE_HOLD_TORSO = {spineX: 0.32, neckX: 0.2, headX: 0.42};
+
 // ---------------- Scene 1: alone in the dim room (0.0s - 7.0s) ----------------
 export const Scene1: React.FC = () => {
 	const t = useCurrentFrame() / 30;
 	const lift = tw(t, 3.0, 4.2) * (1 - tw(t, 5.0, 6.0));
 	const sigh = Math.sin(Math.max(0, Math.min(1, (t - 4.1) / 1.2)) * Math.PI);
 	let pose = mixPose(SEATED, {...SEATED, spineX: 0.25, neckX: 0.0, headX: -0.12, headY: 0.18}, lift);
-	pose = mixPose(pose, {...pose, headX: 0.5, rShX: -0.85, rEl: -1.5}, tw(t, 5.2, 6.3));
-	pose = {...pose, lShZ: pose.lShZ + sigh * 0.06, rShZ: pose.rShZ - sigh * 0.06, spineX: pose.spineX - sigh * 0.05};
+	const raise = tw(t, 5.2, 6.5);
+	pose = mixPose(pose, {...pose, ...PHONE_HOLD_TORSO}, raise);
+	pose = {...pose, spineX: pose.spineX - sigh * 0.05};
 	pose = breathe(pose, t, 1.2);
+	// phone rests in his lap, then he lifts it up to read
+	const phonePos = lerp3(LAP_POS, HOLD_POS, raise);
+	const phoneRot: [number, number, number] = [1.45 + (0.88 - 1.45) * raise, Math.PI, 0];
+	pose = holdPhone(pose, phonePos, phoneRot);
 	const face = mixFace(SAD, {...SAD, lookY: 0.4, lookX: -0.2, brow: 0.6}, lift);
 	face.blink = Math.max(blinkAt(t), sigh * 0.55);
 	const phoneOn = tw(t, 5.0, 5.4);
@@ -146,7 +218,10 @@ export const Scene1: React.FC = () => {
 		<Stage background="#0b1220" fog={['#0b1220', 9, 70]} focus={dist(camPos, [0, 0.95, -0.6])} aperture={0.012} maxblur={0.012}>
 			<Cam pos={camPos} target={target} fov={path1(t, [[0, 36], [7, 31]])} />
 			<BedroomSet t={t} lamp={1} />
-			<Character pose={pose} face={face} rightHand={<PhoneInHand typed="" cursor={false} on={phoneOn} />} />
+			<Character pose={pose} face={face} hideHands />
+			<group position={phonePos} rotation={phoneRot}>
+				<PhoneGrip t={t} mode="rest" typed="" cursor={false} on={phoneOn} />
+			</group>
 		</Stage>
 	);
 };
@@ -164,12 +239,10 @@ export const Scene2: React.FC = () => {
 	const cursor = Math.floor(abs * 2.2) % 2 === 0 || (abs > 6.9 && abs < 9.3) || (abs > 12.2 && abs < 13.6);
 	const screen = 1 - tw(abs, 13.9, 14.15) * 0.92;
 	const typing = (abs > 6.9 && abs < 9.3) || (abs > 12.2 && abs < 13.6) ? 1 : 0;
-	const tap = Math.sin(abs * 26) * 0.05 * typing;
-
-	let pose: Pose = {...PHONE_HOLD, rWr: PHONE_HOLD.rWr + tap, lWr: PHONE_HOLD.lWr - tap};
+	let pose: Pose = {...PHONE_HOLD};
 	const lookAway = tw(abs, 9.7, 10.3) * (1 - tw(abs, 11.6, 12.1));
 	pose = mixPose(pose, {...pose, headX: 0.12, headY: -0.35, neckX: 0.05}, lookAway);
-	pose = mixPose(pose, {...pose, rShX: -0.35, rEl: -1.2, lShX: -0.4, lEl: -1.1, headX: 0.6}, tw(abs, 13.9, 14.6));
+	pose = mixPose(pose, {...pose, headX: 0.6}, tw(abs, 13.9, 14.6));
 	pose = breathe(pose, abs, 1);
 	const face: Face = {
 		...SAD,
@@ -183,7 +256,10 @@ export const Scene2: React.FC = () => {
 
 	// shots: A phone OTS (until 9.5), B face close (9.5-11.5), C phone close push (11.5+)
 	const lower = tw(abs, 13.9, 14.6);
-	const phonePos = lerp3([0.0, 0.99, -0.2], [0.0, 0.74, -0.08], lower);
+	const phonePos = lerp3(HOLD_POS, [0.0, 0.72, -0.15], lower);
+	const phoneRot: [number, number, number] = [0.88 + lower * 0.45, Math.PI, 0];
+	pose = holdPhone(pose, phonePos, phoneRot);
+	const mode = abs > 6.9 && abs < 9.3 ? 'type' : abs > 12.2 && abs < 13.6 ? 'delete' : 'rest';
 	let camPos: V3;
 	let target: V3;
 	let fov: number;
@@ -209,9 +285,9 @@ export const Scene2: React.FC = () => {
 		<Stage background="#0b1220" fog={['#0b1220', 9, 70]} focus={dist(camPos, focusPt)} aperture={0.02} maxblur={0.014}>
 			<Cam pos={camPos} target={target} fov={fov} />
 			<BedroomSet t={abs} lamp={1} />
-			<Character pose={pose} face={face} />
-			<group position={phonePos} rotation={[0.88 - lower * 0.5, Math.PI, 0]}>
-				<Phone typed={typed} cursor={cursor && screen > 0.5} screenOn={screen} />
+			<Character pose={pose} face={face} hideHands />
+			<group position={phonePos} rotation={phoneRot}>
+				<PhoneGrip t={abs} mode={typing ? mode : 'rest'} typed={typed} cursor={cursor && screen > 0.5} on={screen} />
 			</group>
 		</Stage>
 	);
