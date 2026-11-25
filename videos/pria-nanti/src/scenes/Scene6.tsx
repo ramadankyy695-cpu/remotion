@@ -50,7 +50,7 @@ const typingTargets = (f: number, amt: number) => {
 	};
 };
 
-const Scene6Base: React.FC<{f: number; children: React.ReactNode; cam: ReturnType<typeof camLerp>; focus: number; range: number; laptopOpen?: number; glow?: number; exposure?: number}> = ({
+const Scene6Base: React.FC<{f: number; children: React.ReactNode; cam: ReturnType<typeof camLerp>; focus: number; range: number; laptopOpen?: number; glow?: number; exposure?: number; mugOnTable?: boolean}> = ({
 	f,
 	children,
 	cam,
@@ -59,12 +59,13 @@ const Scene6Base: React.FC<{f: number; children: React.ReactNode; cam: ReturnTyp
 	laptopOpen = 1,
 	glow = 1,
 	exposure = 1.25,
+	mugOnTable = true,
 }) => (
 	<Stage cam={cam} bg="#0a0d14" exposure={exposure} focus={focus} focusRange={range} bokeh={4}>
 		<RoomSet frame={f} time="night" clockSeconds={1 * 3600 + 12 * 60 + f / 30} laptopOnDesk={false} lamp={0.25} mess={1} />
 		<LowTable />
 		<Laptop position={FLOOR_LAPTOP} rotationY={Math.PI / 2} open={laptopOpen} glow={glow} screen="chart" />
-		<Mug position={[-0.2, 0.3, -0.72]} />
+		{mugOnTable ? <Mug position={[-0.2, 0.3, -0.72]} /> : null}
 		{laptopOpen > 0.25 ? <pointLight position={[FLOOR_LAPTOP[0] + 0.12, 0.55, FLOOR_LAPTOP[2]]} intensity={glow * 0.45 * Math.min(1, laptopOpen * 1.5)} distance={1.6} decay={2} color="#a9c6ff" /> : null}
 		{children}
 	</Stage>
@@ -129,11 +130,22 @@ export const Scene6d: React.FC = () => {
 	const h = typingTargets(f, 0);
 	const restL: V = rootToWorld(FLOOR_ROOT, [0.16, 0.42, 0.42]);
 	const lT = mixV(h.l, restL, prog(f, 20, 45));
+	// right hand reaches for the mug, lifts it, holds it close while he sighs, takes a small sip
+	const reach = prog(f, 6, 18);
+	const lift = prog(f, 20, 38);
+	const sip = Math.sin(Math.PI * prog(f, 72, 96, (t) => t));
+	const mugTable: V = [-0.2, 0.36, -0.72];
+	const chestHold = rootToWorld(FLOOR_ROOT, [-0.06, 0.6, 0.28]);
+	const mouth = eyesWorld(pose, FLOOR_ROOT);
+	const holdT = mixV(chestHold, [mouth[0] - 0.12, mouth[1] - 0.16, mouth[2] - 0.03], sip);
+	const rT = lift > 0 ? mixV(mugTable, holdT, lift) : mixV(h.r, mugTable, reach);
+	const held = lift > 0.01;
 	const eyes = eyesWorld(pose, FLOOR_ROOT);
 	const cam = handheld(camLerp({pos: [-1.35, 0.85, 0.95], target: [0.25, 0.55, -0.5], fov: 40}, {pos: [-0.95, 0.75, 0.55], target: [0.28, 0.6, -0.5], fov: 36}, prog(f, 0, 99)), f, 0.7);
 	return (
-		<Scene6Base f={f} cam={cam} focus={dist(cam.pos, eyes)} range={0.9}>
-			<Character pose={pose} position={FLOOR_ROOT.position} rotationY={FLOOR_ROOT.rotationY} lTarget={lT} rTarget={h.r} lPalm={[0, -1, 0]} rPalm={[0, -1, 0]} />
+		<Scene6Base f={f} cam={cam} focus={dist(cam.pos, eyes)} range={0.9} mugOnTable={!held}>
+			<Character pose={pose} position={FLOOR_ROOT.position} rotationY={FLOOR_ROOT.rotationY} lTarget={lT} rTarget={rT} lPalm={[0, -1, 0]} rPalm={held ? [0, 0, 1] : [0, -1, 0]} />
+			{held ? <Mug position={[rT[0] - 0.07, rT[1] - 0.06, rT[2] + 0.045]} rotationY={Math.PI / 2} /> : null}
 		</Scene6Base>
 	);
 };

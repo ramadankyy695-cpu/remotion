@@ -3,10 +3,10 @@ import {useCurrentFrame} from 'remotion';
 import {Stage} from '../three/Stage';
 import {Character} from '../three/Character';
 import {Neighborhood, Pedestrians} from '../three/Outdoor';
-import {Backpack, Glow} from '../three/props';
+import {BackpackWorn, Glow} from '../three/props';
 import {blinkAt} from '../three/pose';
 import {eyesWorld} from '../three/kinematics';
-import {camLerp, dist, mixV, prog, walking, handheld} from './util';
+import {camLerp, dist, mixV, prog, walking, handheld, strapHands} from './util';
 
 type V = [number, number, number];
 
@@ -32,7 +32,7 @@ export const Scene9: React.FC = () => {
 			<Glow position={sunPos} scale={18} color="#fff1d0" opacity={1} />
 			<Glow position={mixV(sunPos, cam.pos, 0.5)} scale={3} color="#ffd59a" opacity={0.08} />
 			<Pedestrians frame={f} peds={[{x0: 18, z: 3.4, dir: -1, speed: 1.0, idx: 2}, {x0: 26, z: -3.4, dir: -1, speed: 1.1, idx: 5}, {x0: 34, z: 3.6, dir: 1, speed: 0.9, idx: 6}]} />
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<Backpack />} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<BackpackWorn />} lTarget={strapHands(pose, root).l} lPalm={strapHands(pose, root).palm} />
 		</Stage>
 	);
 };

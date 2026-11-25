@@ -60,3 +60,17 @@ export const pocketHands = (root: RootT, hipsY: number) => ({
 	l: rootToWorld(root, [0.075, 0.95 + hipsY, 0.135]),
 	r: rootToWorld(root, [-0.075, 0.95 + hipsY, 0.135]),
 });
+
+import {localToWorld} from '../three/kinematics';
+import type {Pose as PoseT} from '../three/pose';
+
+// Wrist targets for gripping the backpack straps at chest height.
+export const strapHands = (pose: PoseT, root: {position: [number, number, number]; rotationY: number; scale?: number}, drop = 0) => {
+	const r = {position: root.position, rotationY: root.rotationY, scale: root.scale ?? 1};
+	const fwd: [number, number, number] = [-Math.sin(root.rotationY), 0, -Math.cos(root.rotationY)];
+	return {
+		l: localToWorld(pose, r, 'chest', [0.13, -0.08 - drop, 0.17]),
+		r: localToWorld(pose, r, 'chest', [-0.13, -0.08 - drop, 0.17]),
+		palm: fwd,
+	};
+};

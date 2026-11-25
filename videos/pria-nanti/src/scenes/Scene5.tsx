@@ -3,10 +3,10 @@ import {useCurrentFrame} from 'remotion';
 import {Stage} from '../three/Stage';
 import {Character} from '../three/Character';
 import {Neighborhood, Office} from '../three/Outdoor';
-import {Backpack, BusStop, Chair, Laptop} from '../three/props';
+import {Backpack, BackpackWorn, BusStop, Chair, Laptop, Phone} from '../three/props';
 import {blinkAt, mixPose, sitPose, standPose, withPose} from '../three/pose';
 import {eyesWorld} from '../three/kinematics';
-import {camLerp, dist, handheld, mixV, prog, rootToWorld, walking} from './util';
+import {camLerp, dist, handheld, mixV, prog, rootToWorld, strapHands, walking} from './util';
 
 type V = [number, number, number];
 
@@ -105,7 +105,7 @@ export const Scene5c: React.FC = () => {
 			{[8, 24].map((lx) => (
 				<pointLight key={lx} position={[lx, 4.0, -3.75]} intensity={9} distance={12} decay={1.5} color="#ffcf8a" />
 			))}
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<Backpack />} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<BackpackWorn />} lTarget={strapHands(pose, root).l} rTarget={strapHands(pose, root).r} lPalm={strapHands(pose, root).palm} rPalm={strapHands(pose, root).palm} />
 		</Stage>
 	);
 };
@@ -133,10 +133,12 @@ export const Scene5d: React.FC = () => {
 		face: {blink: blinkAt(f, 7), lid: 0.6, sad: 0.6, lookY: -0.6},
 	});
 	const pose = mixPose(base, base, 0);
-	// hands clasped between the knees
-	const hands = rootToWorld(root, [0, 0.66, 0.4]);
-	const lT: V = [hands[0] + 0.03, hands[1], hands[2]];
-	const rT: V = [hands[0] - 0.03, hands[1] + 0.01, hands[2]];
+	// he takes out his phone and scrolls, elbows on knees; the screen lights his face
+	const lift = prog(f, 4, 18);
+	const hands = rootToWorld(root, [0, 0.66 + lift * 0.12, 0.4 + lift * 0.02]);
+	const scroll = Math.sin(f * 0.35) * 0.012 * lift;
+	const lT: V = [hands[0] + 0.045, hands[1] - 0.01, hands[2] + scroll];
+	const rT: V = [hands[0] - 0.035, hands[1], hands[2]];
 	const cam = handheld(camLerp({pos: [22.4, 1.55, 1.2], target: [20, 0.9, -4.2], fov: 38}, {pos: [21.9, 1.45, 0.4], target: [20, 0.9, -4.2], fov: 34}, prog(f, 0, 51)), f, 0.6);
 	const eyes = eyesWorld(pose, root);
 	return (
@@ -148,7 +150,8 @@ export const Scene5d: React.FC = () => {
 			<group position={[20.75, 0.85, -4.25]} rotation={[0, -0.3, 0]}>
 				<Backpack />
 			</group>
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} lTarget={lT} rTarget={rT} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} lTarget={lT} rTarget={rT} lPalm={[0, 0.3, -1]} rPalm={[-0.1, 0.7, -0.7]} rightHand={lift > 0.1 ? <Phone time="22:47" glow={lift} /> : null} />
+			<pointLight position={[hands[0], hands[1] + 0.15, hands[2] + 0.05]} intensity={0.35 * lift} distance={1.0} decay={2} color="#b9c8ff" />
 		</Stage>
 	);
 };

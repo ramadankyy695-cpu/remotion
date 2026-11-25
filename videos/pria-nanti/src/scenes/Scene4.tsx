@@ -4,11 +4,11 @@ import {useCurrentFrame} from 'remotion';
 import {Stage} from '../three/Stage';
 import {Character, FATHER, MOTHER} from '../three/Character';
 import {Neighborhood} from '../three/Outdoor';
-import {House, houseStyles, Plant} from '../three/props';
+import {GiftBag, House, houseStyles, Plant} from '../three/props';
 import {cyl, lathe, mat, rbox, sphere} from '../three/geo';
 import {blinkAt, sitPose, standPose, withPose} from '../three/pose';
-import {eyesWorld} from '../three/kinematics';
-import {camLerp, dist, handheld, pocketHands, prog, rootToWorld} from './util';
+import {eyesWorld, localToWorld} from '../three/kinematics';
+import {camLerp, dist, handheld, mixV, prog, rootToWorld} from './util';
 
 type V = [number, number, number];
 
@@ -131,13 +131,14 @@ const heroPose = (f: number, lower: number) => {
 export const Scene4a: React.FC = () => {
 	const f = useCurrentFrame();
 	const pose = heroPose(f, 0);
-	const pk = pocketHands(HERO_ROOT, 0);
+	// fiddles with the hoodie drawstring while holding the bag of oranges he brought
+	const fid = localToWorld(pose, HERO_ROOT, 'chest', [-0.03 + Math.sin(f * 0.12) * 0.012, 0.0 + Math.sin(f * 0.09) * 0.03, 0.2]);
 	const cam = handheld(camLerp({pos: [-4.6, 1.75, 6.4], target: [-0.4, 1.0, -7], fov: 34}, {pos: [-4.35, 1.7, 5.7], target: [-0.3, 1.05, -7], fov: 31}, prog(f, 0, 99)), f, 0.8);
 	return (
 		<Stage cam={cam} bg="#e7a77a" exposure={1.0} focus={dist(cam.pos, [0, 1, -7])} focusRange={4} bokeh={3}>
 			<Neighborhood frame={f} light="golden" x0={-20} x1={20} skipHouse={0} sunDir={[-10, 3.2, 5]} shadowCenter={[-1, 0, -2]} />
 			<ParentsHome frame={f} />
-			<Character pose={pose} position={HERO_ROOT.position} rotationY={HERO_ROOT.rotationY} lTarget={pk.l} rTarget={pk.r} />
+			<Character pose={pose} position={HERO_ROOT.position} rotationY={HERO_ROOT.rotationY} rTarget={fid} rPalm={[0, 0, 1]} leftHand={<GiftBag />} />
 		</Stage>
 	);
 };
@@ -161,14 +162,18 @@ export const Scene4c: React.FC = () => {
 	const f = useCurrentFrame();
 	const lower = prog(f, 60, 100);
 	const pose = heroPose(f + 185, lower);
-	const pk = pocketHands(HERO_ROOT, 0);
+	// rubs the back of his neck, then lets the hand drop as he lowers his eyes
+	const rub = prog(f, 10, 28) - prog(f, 70, 95);
+	const nape = localToWorld(pose, HERO_ROOT, 'head', [-0.05 + Math.sin(f * 0.22) * 0.012, -0.02, -0.11]);
+	const side = rootToWorld(HERO_ROOT, [-0.24, 0.78, 0.06]);
+	const rT = mixV(side, nape, rub);
 	const eyes = eyesWorld(pose, HERO_ROOT);
 	const cam = handheld(camLerp({pos: [eyes[0] - 0.55, eyes[1] - 0.05, eyes[2] - 0.95], target: [eyes[0], eyes[1] - 0.12, eyes[2]], fov: 34}, {pos: [eyes[0] - 0.42, eyes[1] - 0.06, eyes[2] - 0.72], target: [eyes[0], eyes[1] - 0.1, eyes[2]], fov: 32}, prog(f, 0, 117)), f, 0.7);
 	return (
 		<Stage cam={cam} bg="#e7a77a" exposure={1.05} focus={dist(cam.pos, eyes)} focusRange={0.35} bokeh={5}>
 			<Neighborhood frame={f} light="golden" x0={-16} x1={16} skipHouse={0} sunDir={[-10, 3.2, 5]} shadowCenter={[-3, 0, 3]} />
 			<ParentsHome frame={f + 185} />
-			<Character pose={pose} position={HERO_ROOT.position} rotationY={HERO_ROOT.rotationY} lTarget={pk.l} rTarget={pk.r} />
+			<Character pose={pose} position={HERO_ROOT.position} rotationY={HERO_ROOT.rotationY} rTarget={rT} rPole={rootToWorld(HERO_ROOT, [-0.6, 1.7, -0.1])} rPalm={rub > 0.5 ? localToWorld(pose, HERO_ROOT, 'head', [0, 0, 1]).map((v, i) => v - localToWorld(pose, HERO_ROOT, 'head', [0, 0, 0])[i]) as V : null} leftHand={<GiftBag />} />
 			<pointLight position={[eyes[0] - 0.8, eyes[1] + 0.3, eyes[2] - 1.0]} intensity={0.6} distance={3} decay={2} color="#ffc58a" />
 		</Stage>
 	);

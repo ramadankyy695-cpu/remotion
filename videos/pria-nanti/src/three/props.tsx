@@ -486,3 +486,61 @@ export const Ground: React.FC<{size?: number; color?: string; map?: THREE.Textur
 		<meshStandardMaterial color={color} map={map ?? null} roughness={0.95} />
 	</mesh>
 );
+
+// Phone held in the hand (attach via Character leftHand/rightHand). Screen faces the palm direction.
+export const Phone: React.FC<{time: string; sub?: string; glow?: number}> = ({time, sub = 'Selasa, 25 November', glow = 1}) => (
+	<group position={[0, -0.03, 0.012]}>
+		<mesh geometry={rbox(0.072, 0.15, 0.009, 0.008)} material={mat('#1b1c20', {rough: 0.3, metal: 0.4})} />
+		<mesh geometry={plane(0.064, 0.138)} position={[0, 0, 0.0051]}>
+			<meshBasicMaterial map={phoneTexCached(time, sub)} toneMapped={false} color={new THREE.Color(glow, glow, glow)} />
+		</mesh>
+	</group>
+);
+
+import {phoneTex} from './textures';
+const phoneTexCached = (t: string, s: string) => phoneTex(t, s);
+
+// Backpack worn on the back with straps over the shoulders. Use in Character `back` slot.
+export const BackpackWorn: React.FC<{color?: string}> = ({color = '#3d4a3f'}) => {
+	const strap = useMemo(() => {
+		return [1, -1].map((s) => {
+			const pts = [
+				[s * 0.1, 0.05, 0.08],
+				[s * 0.1, 0.185, 0.17],
+				[s * 0.105, 0.14, 0.31],
+				[s * 0.11, -0.04, 0.335],
+				[s * 0.12, -0.2, 0.32],
+			].map((p) => new THREE.Vector3(p[0], p[1], p[2]));
+			return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 20, 0.012, 6, false);
+		});
+	}, []);
+	return (
+		<group>
+			<Backpack color={color} />
+			{strap.map((g, i) => (
+				<mesh key={i} geometry={g} material={mat('#2a2f2b', {rough: 0.8})} scale={[1, 1, 1]} castShadow />
+			))}
+		</group>
+	);
+};
+
+// Plastic bag (kresek) with oranges, hanging from the hand.
+export const GiftBag: React.FC = () => (
+	<group position={[0, -0.04, 0.0]}>
+		<mesh geometry={torus(0.035, 0.006, Math.PI, 6, 12)} material={mat('#f2efe8', {rough: 0.6})} rotation={[0, Math.PI / 2, 0]} position={[0, -0.03, 0]} />
+		<mesh geometry={lathe('kresek', [[0.03, -0.06], [0.09, -0.12], [0.13, -0.22], [0.12, -0.32], [0.001, -0.34]], 18)} material={mat('#f4f1ea', {rough: 0.55, transparent: true, opacity: 0.88})} scale={[1, 1, 0.75]} castShadow />
+		{[
+			[0.03, -0.13, 0.02],
+			[-0.04, -0.14, -0.01],
+			[0.0, -0.12, -0.04],
+		].map((p, i) => (
+			<mesh key={i} geometry={sphere(0.04)} material={mat('#e98a2a', {rough: 0.55})} position={p as P3} />
+		))}
+	</group>
+);
+
+export const HeldMug: React.FC = () => (
+	<group position={[0, -0.02, 0.05]} rotation={[Math.PI / 2, 0, 0]}>
+		<Mug position={[0, -0.05, 0]} />
+	</group>
+);

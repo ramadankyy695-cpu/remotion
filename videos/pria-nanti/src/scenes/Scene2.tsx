@@ -7,7 +7,7 @@ import {RoomSet, ROOM} from '../three/RoomSet';
 import {Neighborhood} from '../three/Outdoor';
 import {PhotoFrame} from '../three/props';
 import {blinkAt, sitPose, standPose, withPose} from '../three/pose';
-import {eyesWorld} from '../three/kinematics';
+import {eyesWorld, localToWorld} from '../three/kinematics';
 import {camLerp, dist, handheld, mixV, pocketHands, prog, walking} from './util';
 
 type V = [number, number, number];
@@ -77,19 +77,20 @@ export const Scene2b: React.FC = () => {
 		head: [-0.08 + prog(f, 30, 58) * 0.05, 0.1, 0.06],
 		breath: breathe * 0.4,
 		lWrist: [0, 0, 0],
-		lFingers: 0.25,
-		rFingers: 0.6,
+		lFingers: 0.15 + prog(f, 28, 58) * 0.35,
+		rFingers: 0.75,
 		face: {blink: blinkAt(f, 8), lid: 0.2, sad: 0.4, smile: 0.15 * dream, lookY: 0.05},
 	});
 	const eyes = eyesWorld(pose, root);
-	// left hand rests on the window frame, right hand in the pocket
-	const lT: V = [0.5, 1.35, -1.74];
-	const rT: V = pocketHands(root, 0).r;
+	// left hand rises and presses against the glass; right hand holds the curtain edge
+	const raise = prog(f, 0, 22);
+	const lT = mixV(pocketHands(root, 0).l, [0.66, 1.42 - prog(f, 25, 58) * 0.05, -1.76], raise);
+	const rT: V = mixV([1.2, 1.1, -1.5], [1.4, 1.32, -1.66], prog(f, 4, 26));
 	const cam = handheld(camLerp({pos: [1.25, 1.78, 0.75], target: [0.9, 1.45, -6], fov: 42}, {pos: [1.2, 1.75, 0.45], target: [0.92, 1.48, -6], fov: 39}, prog(f, 0, 58)), f, 0.7);
 	return (
 		<Stage cam={cam} bg="#0a0d14" exposure={1.15} focus={dist(cam.pos, [1.6, 1.3, -12])} focusRange={8} bokeh={2}>
 			<RoomSet frame={f + 400} time="night" clockSeconds={23 * 3600 + 51 * 60 + f / 30} lamp={0.7} dream={dream} />
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} lTarget={lT} rTarget={rT} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} lTarget={lT} rTarget={rT} lPalm={[0, 0, -1]} rPalm={[1, 0, 0]} />
 			<pointLight position={[eyes[0], eyes[1] + 0.2, eyes[2] - 0.6]} intensity={0.25 + dream * 0.25} distance={2} decay={2} color="#ffd0a0" />
 		</Stage>
 	);
@@ -111,12 +112,15 @@ export const Scene2c: React.FC = () => {
 	const eyes = eyesWorld(pose, root);
 	const pk = pocketHands(root, pose.hipsY);
 	const pocketL = pk.l;
-	const pocketR = pk.r;
+	// right hand comes up to rub the back of his neck while he thinks, then back to the pocket
+	const neck = prog(f, 14, 30) - prog(f, 64, 80);
+	const nape = localToWorld(pose, {...root, scale: 1}, 'head', [-0.05 + Math.sin(f * 0.25) * 0.012, -0.02, -0.11]);
+	const pocketR = mixV(pk.r, nape, neck);
 	const cam = handheld({pos: [x + 2.4, 1.45, -2.4 + Math.sin(t * 0.5) * 0.05], target: [x + 0.1, 1.2, -3.6], fov: 36}, f, 1.2);
 	return (
 		<Stage cam={cam} bg="#b8cfe6" exposure={1.0} focus={dist(cam.pos, eyes)} focusRange={1.2} bokeh={3}>
 			<Neighborhood frame={f} light="afternoon" x0={-16} x1={30} sunDir={[6, 5, 5]} shadowCenter={[x, 0, -3]} />
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} lTarget={pocketL} rTarget={pocketR} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} lTarget={pocketL} rTarget={pocketR} rPole={[x - 0.3, 1.9, -4.5]} rPalm={neck > 0.5 ? [0, 0.2, 1] : null} />
 		</Stage>
 	);
 };

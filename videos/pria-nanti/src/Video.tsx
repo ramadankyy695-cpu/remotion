@@ -112,6 +112,10 @@ const Fade: React.FC = () => {
 
 // ------------------------------------------------------------------ audio
 
+// Global mix levels: foley/SFX and ambience sit well under the VO.
+const SFX_LEVEL = 0.45;
+const AMB_LEVEL = 0.6;
+
 type Amb = {file: string; from: number; to: number; vol: number; fadeIn?: number; fadeOut?: number};
 
 const AmbTrack: React.FC<Amb> = ({file, from, to, vol, fadeIn = 12, fadeOut = 12}) => {
@@ -121,7 +125,7 @@ const AmbTrack: React.FC<Amb> = ({file, from, to, vol, fadeIn = 12, fadeOut = 12
 			<Audio
 				src={staticFile(`sfx/${file}`)}
 				loop
-				volume={(f) => vol * Math.min(interpolate(f, [0, fadeIn], [0, 1], {extrapolateRight: 'clamp'}), interpolate(f, [dur - fadeOut, dur], [1, 0], {extrapolateLeft: 'clamp'}))}
+				volume={(f) => AMB_LEVEL * vol * Math.min(interpolate(f, [0, fadeIn], [0, 1], {extrapolateRight: 'clamp'}), interpolate(f, [dur - fadeOut, dur], [1, 0], {extrapolateLeft: 'clamp'}))}
 			/>
 		</Sequence>
 	);
@@ -129,7 +133,7 @@ const AmbTrack: React.FC<Amb> = ({file, from, to, vol, fadeIn = 12, fadeOut = 12
 
 const Sfx: React.FC<{file: string; at: number; vol: number}> = ({file, at, vol}) => (
 	<Sequence from={Math.max(0, Math.round(at))} durationInFrames={150} layout="none">
-		<Audio src={staticFile(`sfx/${file}`)} volume={vol} />
+		<Audio src={staticFile(`sfx/${file}`)} volume={vol * SFX_LEVEL} />
 	</Sequence>
 );
 

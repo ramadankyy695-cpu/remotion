@@ -3,15 +3,16 @@ import {useCurrentFrame} from 'remotion';
 import {Stage} from '../three/Stage';
 import {Character} from '../three/Character';
 import {Neighborhood} from '../three/Outdoor';
-import {Backpack, Glow, House, houseStyles, Tree} from '../three/props';
+import {BackpackWorn, Glow, House, houseStyles, Tree} from '../three/props';
 import {mat, rbox, sphere} from '../three/geo';
 import {blinkAt, standPose, mixPose, withPose} from '../three/pose';
 import {eyesWorld} from '../three/kinematics';
-import {camLerp, dist, handheld, prog, walking} from './util';
+import {camLerp, dist, handheld, prog, strapHands, walking} from './util';
 
 type V = [number, number, number];
 
 const DREAM_X = 8;
+let GRIP = 0;
 
 // A modest but warm house: lit windows, a tree with a small swing, potted plants.
 export const DreamHouse: React.FC<{frame: number; lit: number}> = ({frame, lit}) => (
@@ -47,6 +48,7 @@ const walkerPose = (d: number, f: number, mood = 0.25, phase0 = 0) => {
 // 7a — dusk: walking past the houses with his backpack. Side tracking from the road.
 export const Scene7a: React.FC = () => {
 	const f = useCurrentFrame();
+	GRIP = 0;
 	const d = 0.95 * (f / 30);
 	const x = -3 + d;
 	const pose = walkerPose(d, f);
@@ -59,7 +61,7 @@ export const Scene7a: React.FC = () => {
 			<Neighborhood frame={f} light="dusk" x0={-20} x1={24} lit={0.8} lampsOn={0.6} skipHouse={DREAM_X} shadowCenter={[x, 0, -3]} />
 			<DreamHouse frame={f} lit={0.9} />
 			<pointLight position={[x + 1.2, 2.2, -1.5]} intensity={1.2} distance={5} decay={1.5} color="#ffc890" />
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<Backpack />} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<BackpackWorn />} lTarget={strapHands(pose, root, GRIP).l} rTarget={strapHands(pose, root, GRIP).r} lPalm={strapHands(pose, root).palm} rPalm={strapHands(pose, root).palm} />
 		</Stage>
 	);
 };
@@ -82,12 +84,15 @@ export const Scene7b: React.FC = () => {
 	});
 	const pose = mixPose(walk, stand, prog(f, 24, 36));
 	const root = {position: [x, 0.15, -3.6] as V, rotationY: Math.PI / 2 + turn * (Math.PI / 2 - 0.1), scale: 1};
+	GRIP = prog(f, 40, 70) * 0.06;
+	pose.lFingers = 0.5 + prog(f, 40, 70) * 0.4;
+	pose.rFingers = 0.5 + prog(f, 40, 70) * 0.4;
 	const cam = handheld(camLerp({pos: [x - 0.6, 1.8, 0.9], target: [DREAM_X + 0.6, 1.5, -9], fov: 42}, {pos: [x - 0.4, 1.78, 0.3], target: [DREAM_X + 0.6, 1.55, -9], fov: 38}, prog(f, 0, 82)), f, 0.8);
 	return (
 		<Stage cam={cam} bg="#232a52" exposure={1.2} focus={dist(cam.pos, [DREAM_X, 1.5, -8])} focusRange={4} bokeh={3}>
 			<Neighborhood frame={f + 95} light="dusk" x0={-8} x1={26} lit={0.8} lampsOn={0.8} skipHouse={DREAM_X} shadowCenter={[x, 0, -5]} />
 			<DreamHouse frame={f + 95} lit={0.9 + prog(f, 30, 70) * 0.25} />
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<Backpack />} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<BackpackWorn />} lTarget={strapHands(pose, root, GRIP).l} rTarget={strapHands(pose, root, GRIP).r} lPalm={strapHands(pose, root).palm} rPalm={strapHands(pose, root).palm} />
 		</Stage>
 	);
 };
@@ -95,6 +100,7 @@ export const Scene7b: React.FC = () => {
 // 7c — he turns away and walks back into the dusk; static wide, streetlights flicker on.
 export const Scene7c: React.FC = () => {
 	const f = useCurrentFrame();
+	GRIP = 0.06 - prog(f, 0, 30) * 0.06;
 	const turn = prog(f, 0, 22);
 	const go = Math.max(0, f - 14);
 	const d = 0.9 * (go / 30);
@@ -114,7 +120,7 @@ export const Scene7c: React.FC = () => {
 			{[0, -16].map((lx) => (
 				<pointLight key={lx} position={[lx, 4.0, -3.75]} intensity={6 * lamps} distance={10} decay={1.5} color="#ffcf8a" />
 			))}
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<Backpack />} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} back={<BackpackWorn />} lTarget={strapHands(pose, root, GRIP).l} rTarget={strapHands(pose, root, GRIP).r} lPalm={strapHands(pose, root).palm} rPalm={strapHands(pose, root).palm} />
 		</Stage>
 	);
 };

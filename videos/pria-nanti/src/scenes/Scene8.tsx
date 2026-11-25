@@ -5,8 +5,8 @@ import {Character} from '../three/Character';
 import {RoomSet, ROOM} from '../three/RoomSet';
 import {Laptop} from '../three/props';
 import {blinkAt, floorSitPose, mixPose, sitPose, standPose, withPose} from '../three/pose';
-import {eyesWorld} from '../three/kinematics';
-import {camLerp, dist, handheld, mixV, prog} from './util';
+import {eyesWorld, localToWorld} from '../three/kinematics';
+import {camLerp, dist, handheld, mixV, prog, rootToWorld} from './util';
 import {FLOOR_ROOT, LowTable} from './Scene6';
 import {deskTyping} from './Scene1';
 
@@ -38,12 +38,22 @@ export const Scene8a: React.FC = () => {
 	const pose = b > 0 ? mixPose(crouch, stand, b) : mixPose(floor, crouch, a);
 	const root = {position: mixV(FLOOR_ROOT.position, [0.2, 0, -0.45], a) as V, rotationY: FLOOR_ROOT.rotationY, scale: 1};
 	const eyes = eyesWorld(pose, root);
+	// hands push on the floor/bed edge to get up, then right hand runs through his hair
+	const push = 1 - prog(f, 34, 48);
+	const lPush: V = [0.62, 0.36, -0.15];
+	const rPush: V = [0.62, 0.36, -0.75];
+	const lRest = rootToWorld(root, [0.22, 0.85 + pose.hipsY, 0.05]);
+	const hair = prog(f, 50, 60) * (1 - prog(f, 68, 74));
+	const hairT = localToWorld(pose, root, 'head', [-0.02, 0.2, 0.02 - prog(f, 50, 68) * 0.08]);
+	const rRest = rootToWorld(root, [-0.22, 0.85 + pose.hipsY, 0.05]);
+	const lT = mixV(lRest, lPush, push);
+	const rT = mixV(mixV(rRest, hairT, hair), rPush, push);
 	const cam = handheld(camLerp({pos: [-1.3, 0.75, 0.9], target: [0.3, 0.6, -0.5], fov: 40}, {pos: [-1.2, 1.25, 0.75], target: [eyes[0], eyes[1] - 0.15, eyes[2]], fov: 38}, prog(f, 10, 74)), f, 0.7);
 	return (
 		<Stage cam={cam} bg="#a9bfe0" exposure={1.3} focus={dist(cam.pos, eyes)} focusRange={1.0} bokeh={3}>
 			<RoomSet frame={f} time="dawn" clockSeconds={5 * 3600 + 41 * 60 + f / 30} laptopOnDesk lamp={0} laptopOpen={0} mess={1} />
 			<LowTable />
-			<Character pose={pose} position={root.position} rotationY={root.rotationY} />
+			<Character pose={pose} position={root.position} rotationY={root.rotationY} lTarget={lT} rTarget={rT} lPalm={push > 0.5 ? [0, -1, 0] : null} rPalm={push > 0.5 ? [0, -1, 0] : hair > 0.5 ? [0, -1, 0] : null} rPole={hair > 0.3 ? rootToWorld(root, [-0.5, 1.6, 0.2]) : undefined} />
 		</Stage>
 	);
 };

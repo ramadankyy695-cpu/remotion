@@ -344,3 +344,22 @@ export const windowsTex = (seed: number, lit: number) =>
 			}
 		}
 	});
+
+export const phoneTex = (text: string, sub: string) =>
+	make(`phone-${text}-${sub}`, 180, 360, (c) => {
+		const g = c.createLinearGradient(0, 0, 0, 360);
+		g.addColorStop(0, '#2b3d63');
+		g.addColorStop(1, '#6d4f7a');
+		c.fillStyle = g;
+		c.fillRect(0, 0, 180, 360);
+		c.fillStyle = '#ffffff';
+		c.textAlign = 'center';
+		c.font = 'bold 52px sans-serif';
+		c.fillText(text, 90, 120);
+		c.font = '18px sans-serif';
+		c.fillStyle = 'rgba(255,255,255,0.8)';
+		c.fillText(sub, 90, 150);
+		c.fillStyle = 'rgba(255,255,255,0.18)';
+		c.fillRect(20, 220, 140, 40);
+		c.fillRect(20, 270, 140, 40);
+	});
